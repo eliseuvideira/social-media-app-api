@@ -1,18 +1,23 @@
 import express from 'express';
 import cors from 'cors';
-import { json } from 'body-parser';
+import { json, urlencoded } from 'body-parser';
 import { readdirSync } from 'fs';
 import { join } from 'path';
 import { notFound, exception } from './middlewares/errors';
 import morgan from 'morgan';
 import helmet from 'helmet';
+import compression from 'compression';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 
 app.use(cors());
 app.use(json());
+app.use(urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(morgan('combined'));
 app.use(helmet());
+app.use(compression());
 
 app.use('/robots.txt', (req, res) =>
   res.status(200).send('User-agent: *\nDisallow: /'),
