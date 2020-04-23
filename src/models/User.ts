@@ -1,7 +1,6 @@
 import { Schema, model, Document, Model } from 'mongoose';
 import { Regexes } from '../utils/Regexes';
-import { compare, hash } from 'bcryptjs';
-import uuid from 'uuid/v4';
+import { compare, hash, genSalt } from 'bcryptjs';
 
 interface IUser {
   name: string;
@@ -44,8 +43,8 @@ userSchema.statics.encryptPassword = async (
   return hash(password, salt);
 };
 
-userSchema.statics.makeSalt = async (): Promise<string> => {
-  return uuid();
+userSchema.statics.makeSalt = (): Promise<string> => {
+  return genSalt(12);
 };
 
 userSchema.methods.verifyPassword = async function (
@@ -57,7 +56,7 @@ userSchema.methods.verifyPassword = async function (
 interface IUserDocument extends Document, IUser {}
 
 interface IUserModel extends Model<IUserDocument> {
-  encryptPassword: (password: string) => Promise<string>;
+  encryptPassword: (password: string, salt: string) => Promise<string>;
   makeSalt: () => Promise<string>;
 }
 

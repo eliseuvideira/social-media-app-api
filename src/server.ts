@@ -1,8 +1,9 @@
 import { loadEnv } from './utils/loadEnv';
+import { connect, connection } from 'mongoose';
 
 loadEnv();
 
-console.info(`NODE_ENV is set to ${process.env.NODE_ENV}`)
+console.info(`NODE_ENV is set to ${process.env.NODE_ENV}`);
 
 import http from 'http';
 import app from './app';
@@ -36,10 +37,26 @@ const onListening = (): void => {
   }
 };
 
+const onConnectionError = (): void => {
+  console.error(`Unable to connect to database: ${process.env.MONGODB_URI}`);
+  process.exit(1);
+};
+
 (async (): Promise<void> => {
+  if (!process.env.MONGODB_URI) {
+    console.error(`environment variable MONGODB_URI is not set`);
+    process.exit(1);
+  }
+  await connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+  });
+  connection.on('error', onConnectionError);
   server.listen(port);
   server.on('error', onError);
   server.on('listening', onListening);
 })().catch((err) => {
   console.error(err);
+  process.exit(1);
 });
