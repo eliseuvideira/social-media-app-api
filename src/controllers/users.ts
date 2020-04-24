@@ -5,7 +5,7 @@ import { HttpError } from '../utils/HttpError';
 export const getUsers: RequestHandler = async (req, res, next) => {
   try {
     const users = await User.find();
-    res.status(200).json({ users });
+    res.status(200).json({ users: users.map((user) => user.serialize()) });
   } catch (err) {
     next(err);
   }
@@ -23,7 +23,7 @@ export const postUsers: RequestHandler = async (req, res, next) => {
       salt,
     });
     await user.save();
-    res.status(201).json({ user });
+    res.status(201).json({ user: user.serialize() });
   } catch (err) {
     next(err);
   }
@@ -36,7 +36,7 @@ export const getUser: RequestHandler = async (req, res, next) => {
     if (!user) {
       throw new HttpError(404, 'Not found');
     }
-    res.status(200).json({ user });
+    res.status(200).json({ user: user.serialize() });
   } catch (err) {
     next(err);
   }
@@ -52,7 +52,7 @@ export const putUser: RequestHandler = async (req, res, next) => {
     const { name } = req.body;
     user.name = name;
     await user.save();
-    res.status(200).json({ user });
+    res.status(200).json({ user: user.serialize() });
   } catch (err) {
     next(err);
   }

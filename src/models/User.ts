@@ -2,15 +2,16 @@ import { Schema, model, Document, Model } from 'mongoose';
 import { Regexes } from '../utils/Regexes';
 import { compare, hash, genSalt } from 'bcryptjs';
 
-interface IUser {
+interface IUserDocument extends Document {
   name: string;
   email: string;
   password: string;
   salt: string;
   verifyPassword: (password: string, salt: string) => Promise<boolean>;
+  serialize: () => object;
 }
 
-const userSchema = new Schema<IUser>(
+const userSchema = new Schema<IUserDocument>(
   {
     name: {
       type: String,
@@ -53,7 +54,13 @@ userSchema.methods.verifyPassword = async function (
   return compare(password, this.password);
 };
 
-interface IUserDocument extends Document, IUser {}
+userSchema.methods.serialize = function (): object {
+  return {
+    _id: this._id,
+    name: this.name,
+    email: this.email,
+  };
+};
 
 interface IUserModel extends Model<IUserDocument> {
   encryptPassword: (password: string, salt: string) => Promise<string>;
