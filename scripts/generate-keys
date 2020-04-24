@@ -1,0 +1,21 @@
+#!/bin/node
+/* eslint-disable */
+const { execSync } = require('child_process');
+const { join } = require('path');
+
+const path = join(__dirname, '..', 'keys');
+const privateKey = join(path, 'private.key');
+const publicKey = join(path, 'public.pem');
+
+console.info('Creating folder structure...');
+execSync(`mkdir -p ${path}`);
+
+console.info('Generating private key');
+execSync(`openssl genrsa -out ${privateKey} 2048`);
+
+console.info('Generating public key');
+execSync(
+  `openssl rsa -in ${privateKey} -outform PEM -pubout -out ${publicKey}`,
+);
+
+console.info('Keys generated with success');
