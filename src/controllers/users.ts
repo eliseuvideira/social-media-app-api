@@ -45,6 +45,12 @@ export const getUser: RequestHandler = async (req, res, next) => {
 export const putUser: RequestHandler = async (req, res, next) => {
   try {
     const { _id } = req.params;
+    if (!req.token) {
+      throw new HttpError(401, 'Unathorized');
+    }
+    if (!req.token.user || req.token.user._id !== _id) {
+      throw new HttpError(403, 'Forbidden');
+    }
     const user = await User.findById(_id);
     if (!user) {
       throw new HttpError(404, 'Not found');
@@ -61,6 +67,12 @@ export const putUser: RequestHandler = async (req, res, next) => {
 export const deleteUser: RequestHandler = async (req, res, next) => {
   try {
     const { _id } = req.params;
+    if (!req.token) {
+      throw new HttpError(401, 'Unathorized');
+    }
+    if (!req.token.user || req.token.user._id !== _id) {
+      throw new HttpError(403, 'Forbidden');
+    }
     const user = await User.findById(_id);
     if (!user) {
       throw new HttpError(404, 'Not found');
