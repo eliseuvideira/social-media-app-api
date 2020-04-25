@@ -5,6 +5,10 @@ loadEnv();
 
 console.info(`NODE_ENV is set to ${process.env.NODE_ENV}`);
 
+import { checkFiles } from './utils/checkFiles';
+
+checkFiles();
+
 import http from 'http';
 import app from './app';
 
