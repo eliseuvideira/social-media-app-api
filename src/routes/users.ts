@@ -16,11 +16,11 @@ import { isAuth } from '../middlewares/isAuth';
 
 const router = Router();
 
-router.get('/users', isAuth, getUsers);
+router.get('/users', getUsers);
 
 router.post('/users', body(postUsersBodySchema), postUsers);
 
-router.get('/users/:_id', isAuth, params(getUserParamsSchema), getUser);
+router.get('/users/:_id', params(getUserParamsSchema), getUser);
 
 router.put(
   '/users/:_id',
