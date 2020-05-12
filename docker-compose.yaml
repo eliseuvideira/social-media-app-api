@@ -1,0 +1,29 @@
+version: '3'
+
+networks:
+  api-network:
+
+services:
+  api:
+    build: '.'
+    container_name: '${CONTAINER_NAME}'
+    ports:
+      - '${PORT}:${PORT}'
+    networks:
+      - 'api-network'
+    depends_on:
+      - 'mongodb'
+    restart: 'always'
+    environment:
+      - 'NODE_ENV=production'
+      - 'MONGODB_URI=${MONGODB_URI}'
+  mongodb:
+    container_name: '${MONGODB_CONTAINER_NAME}'
+    image: 'mongo'
+    ports:
+      - '27017:27017'
+    networks:
+      - 'api-network'
+    restart: 'always'
+    volumes:
+      - '~/data:/data/db'
