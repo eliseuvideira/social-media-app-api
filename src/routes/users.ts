@@ -20,7 +20,7 @@ router.get('/users', getUsers);
 
 router.post('/users', body(postUsersBodySchema), postUsers);
 
-router.get('/users/:_id', params(getUserParamsSchema), getUser);
+router.get('/users/:_id', isAuth, params(getUserParamsSchema), getUser);
 
 router.put(
   '/users/:_id',

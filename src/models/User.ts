@@ -11,6 +11,12 @@ interface IUserDocument extends Document {
   serialize: () => object;
 }
 
+interface IUserSerialized {
+  _id: any;
+  name: string;
+  email: string;
+}
+
 const userSchema = new Schema<IUserDocument>(
   {
     name: {
@@ -54,7 +60,7 @@ userSchema.methods.verifyPassword = async function (
   return compare(password, this.password);
 };
 
-userSchema.methods.serialize = function (): object {
+userSchema.methods.serialize = function (): IUserSerialized {
   return {
     _id: this._id,
     name: this.name,
