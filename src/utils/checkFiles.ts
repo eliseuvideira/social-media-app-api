@@ -1,8 +1,10 @@
-import * as paths from './paths';
+import * as constants from './constants';
 import { existsSync } from 'fs';
 
 export const checkFiles = (): void => {
-  const items = Object.entries(paths);
+  const items = Object.entries(constants).filter(([key]) =>
+    /_PATH$/.test(key),
+  ) as [string, string][];
   const notFound = [];
   for (const [, path] of items) {
     const exists = existsSync(path);

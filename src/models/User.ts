@@ -1,5 +1,5 @@
 import { Schema, model, Document, Model } from 'mongoose';
-import { Regexes } from '../utils/Regexes';
+import { REGEX_EMAIL } from '../utils/constants';
 import { compare, hash, genSalt } from 'bcryptjs';
 
 interface IUserDocument extends Document {
@@ -28,7 +28,7 @@ const userSchema = new Schema<IUserDocument>(
       type: String,
       trim: true,
       unique: true,
-      match: Regexes.email,
+      match: REGEX_EMAIL,
       required: true,
     },
     password: {

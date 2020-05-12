@@ -4,14 +4,14 @@ import { HttpError } from '../utils/HttpError';
 import { sign } from 'jsonwebtoken';
 import fs from 'fs';
 import { promisify } from 'util';
-import * as paths from '../utils/paths';
+import { PRIVATE_KEY_PATH } from '../utils/constants';
 
 const readFile = promisify(fs.readFile);
 
 let key: Buffer | null = null;
 const getPrivateKey = async (): Promise<Buffer> => {
   if (!key) {
-    key = await readFile(paths.privateKey);
+    key = await readFile(PRIVATE_KEY_PATH);
   }
   return key;
 };
