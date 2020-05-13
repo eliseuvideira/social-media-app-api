@@ -16,7 +16,7 @@ services:
     restart: 'always'
     environment:
       - 'NODE_ENV=production'
-      - 'MONGODB_URI=${MONGODB_URI}'
+      - 'MONGODB_URI=mongodb://${MONGODB_CONTAINER_NAME}:27017/${APP_NAME}'
   mongodb:
     container_name: '${MONGODB_CONTAINER_NAME}'
     image: 'mongo'
