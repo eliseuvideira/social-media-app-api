@@ -9,12 +9,16 @@ interface IUserDocument extends Document {
   salt: string;
   verifyPassword: (password: string, salt: string) => Promise<boolean>;
   serialize: () => object;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface IUserSerialized {
   _id: any;
   name: string;
   email: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const userSchema = new Schema<IUserDocument>(
@@ -65,6 +69,8 @@ userSchema.methods.serialize = function (): IUserSerialized {
     _id: this._id,
     name: this.name,
     email: this.email,
+    createdAt: this.createdAt,
+    updatedAt: this.updatedAt,
   };
 };
 
