@@ -28,7 +28,9 @@ export const signIn: RequestHandler = async (req, res, next) => {
       throw new HttpError(401, 'Invalid credentials');
     }
     const privateKey = await getPrivateKey();
-    const token = sign({ _id: user._id }, privateKey, { algorithm: 'RS256' });
+    const token = sign({ user: user.serialize() }, privateKey, {
+      algorithm: 'RS256',
+    });
     res.cookie('token', token, { maxAge: 10 * 60 * 1000 });
     res.status(200).json({
       token,
