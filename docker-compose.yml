@@ -26,4 +26,4 @@ services:
       - 'api-network'
     restart: 'always'
     volumes:
-      - '~/data:/data/db'
+      - '~/data/mongodb:/data/db'
