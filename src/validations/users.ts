@@ -18,5 +18,7 @@ export const getUserParamsSchema = Joi.object()
 export const putUserBodySchema = Joi.object()
   .keys({
     name: Joi.string().trim().min(6).required(),
+    email: Joi.string().trim().lowercase().regex(REGEX_EMAIL).required(),
+    password: Joi.string().min(6),
   })
   .required();

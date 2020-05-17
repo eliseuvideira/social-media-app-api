@@ -55,8 +55,14 @@ export const putUser: RequestHandler = async (req, res, next) => {
     if (!user) {
       throw new HttpError(404, 'Not found');
     }
-    const { name } = req.body;
+    const { name, email, password } = req.body;
     user.name = name;
+    user.email = email;
+    if (password) {
+      const salt = await User.makeSalt();
+      const hashedPassword = await User.encryptPassword(password, salt);
+      user.password = hashedPassword;
+    }
     await user.save();
     res.status(200).json({ user: user.serialize() });
   } catch (err) {
