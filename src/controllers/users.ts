@@ -14,13 +14,11 @@ export const getUsers: RequestHandler = async (req, res, next) => {
 export const postUsers: RequestHandler = async (req, res, next) => {
   try {
     const { email, name, password } = req.body;
-    const salt = await User.makeSalt();
-    const hashedPassword = await User.encryptPassword(password, salt);
+    const hashedPassword = await User.encryptPassword(password);
     const user = new User({
       email,
       name,
       password: hashedPassword,
-      salt,
     });
     await user.save();
     res.status(201).json({ user: user.serialize() });
@@ -59,8 +57,7 @@ export const putUser: RequestHandler = async (req, res, next) => {
     user.name = name;
     user.email = email;
     if (password) {
-      const salt = await User.makeSalt();
-      const hashedPassword = await User.encryptPassword(password, salt);
+      const hashedPassword = await User.encryptPassword(password);
       user.password = hashedPassword;
     }
     await user.save();

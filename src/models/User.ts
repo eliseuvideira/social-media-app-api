@@ -1,13 +1,12 @@
 import { Schema, model, Document, Model } from 'mongoose';
 import { REGEX_EMAIL } from '../utils/constants';
-import { compare, hash, genSalt } from 'bcryptjs';
+import { compare, hash } from 'bcryptjs';
 
 interface IUserDocument extends Document {
   name: string;
   email: string;
   password: string;
-  salt: string;
-  verifyPassword: (password: string, salt: string) => Promise<boolean>;
+  verifyPassword: (password: string) => Promise<boolean>;
   serialize: () => object;
   createdAt: Date;
   updatedAt: Date;
@@ -39,23 +38,14 @@ const userSchema = new Schema<IUserDocument>(
       type: String,
       required: true,
     },
-    salt: {
-      type: String,
-      required: true,
-    },
   },
   { timestamps: true },
 );
 
 userSchema.statics.encryptPassword = async (
   password: string,
-  salt: string,
 ): Promise<string> => {
-  return hash(password, salt);
-};
-
-userSchema.statics.makeSalt = (): Promise<string> => {
-  return genSalt(12);
+  return hash(password, 12);
 };
 
 userSchema.methods.verifyPassword = async function (
@@ -75,8 +65,7 @@ userSchema.methods.serialize = function (): IUserSerialized {
 };
 
 interface IUserModel extends Model<IUserDocument> {
-  encryptPassword: (password: string, salt: string) => Promise<string>;
-  makeSalt: () => Promise<string>;
+  encryptPassword: (password: string) => Promise<string>;
 }
 
 export const User = model<IUserDocument, IUserModel>('User', userSchema);

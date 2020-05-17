@@ -23,7 +23,7 @@ export const signIn: RequestHandler = async (req, res, next) => {
     if (!user) {
       throw new HttpError(401, 'Invalid credentials');
     }
-    const isValid = await user.verifyPassword(password, user.salt);
+    const isValid = await user.verifyPassword(password);
     if (!isValid) {
       throw new HttpError(401, 'Invalid credentials');
     }
