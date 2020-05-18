@@ -128,3 +128,18 @@ export const deleteUser: RequestHandler = async (req, res, next) => {
     next(err);
   }
 };
+
+export const getUserPhoto: RequestHandler = async (req, res, next) => {
+  try {
+    const { _id } = req.params;
+    const user = await User.findById(_id);
+    if (!user || !user.photo) {
+      throw new HttpError(404, 'Not found');
+    }
+    const bucketFile = bucket.file(user.photo.filename);
+    const stream = bucketFile.createReadStream();
+    stream.pipe(res.status(200));
+  } catch (err) {
+    next(err);
+  }
+};

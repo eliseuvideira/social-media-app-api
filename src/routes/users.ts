@@ -5,6 +5,7 @@ import {
   getUser,
   putUser,
   deleteUser,
+  getUserPhoto,
 } from '../controllers/users';
 import { body, params } from '../middlewares/validation';
 import {
@@ -33,5 +34,7 @@ router.put(
 );
 
 router.delete('/users/:_id', isAuth, params(getUserParamsSchema), deleteUser);
+
+router.get('/users/:_id/photo', getUserPhoto);
 
 export default router;
