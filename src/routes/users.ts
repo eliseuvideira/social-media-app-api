@@ -13,6 +13,7 @@ import {
   putUserBodySchema,
 } from '../validations/users';
 import { isAuth } from '../middlewares/isAuth';
+import { multer } from '../middlewares/multer';
 
 const router = Router();
 
@@ -25,6 +26,7 @@ router.get('/users/:_id', isAuth, params(getUserParamsSchema), getUser);
 router.put(
   '/users/:_id',
   isAuth,
+  multer.single('photo'),
   params(getUserParamsSchema),
   body(putUserBodySchema),
   putUser,

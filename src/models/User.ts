@@ -2,7 +2,7 @@ import { Schema, model, Document, Model } from 'mongoose';
 import { REGEX_EMAIL } from '../utils/constants';
 import { compare, hash } from 'bcryptjs';
 
-interface IUserDocument extends Document {
+interface IUser {
   name: string;
   email: string;
   password: string;
@@ -10,6 +10,12 @@ interface IUserDocument extends Document {
   serialize: () => object;
   createdAt: Date;
   updatedAt: Date;
+  about?: string;
+  photo?: {
+    url: string;
+    filename: string;
+    contentType: string;
+  };
 }
 
 interface IUserSerialized {
@@ -18,9 +24,15 @@ interface IUserSerialized {
   email: string;
   createdAt: Date;
   updatedAt: Date;
+  about?: string;
+  photo?: {
+    url: string;
+    filename: string;
+    contentType: string;
+  };
 }
 
-const userSchema = new Schema<IUserDocument>(
+const userSchema = new Schema<IUser & Document>(
   {
     name: {
       type: String,
@@ -37,6 +49,27 @@ const userSchema = new Schema<IUserDocument>(
     password: {
       type: String,
       required: true,
+    },
+    about: {
+      type: String,
+      trim: true,
+    },
+    photo: {
+      type: {
+        url: {
+          type: String,
+          required: true,
+        },
+        filename: {
+          type: String,
+          required: true,
+        },
+        contentType: {
+          type: String,
+          required: true,
+        },
+      },
+      required: false,
     },
   },
   { timestamps: true },
@@ -64,8 +97,8 @@ userSchema.methods.serialize = function (): IUserSerialized {
   };
 };
 
-interface IUserModel extends Model<IUserDocument> {
+interface IUserModel extends Model<IUser & Document> {
   encryptPassword: (password: string) => Promise<string>;
 }
 
-export const User = model<IUserDocument, IUserModel>('User', userSchema);
+export const User = model<IUser & Document, IUserModel>('User', userSchema);

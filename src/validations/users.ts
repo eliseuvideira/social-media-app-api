@@ -20,5 +20,6 @@ export const putUserBodySchema = Joi.object()
     name: Joi.string().trim().min(6).required(),
     email: Joi.string().trim().lowercase().regex(REGEX_EMAIL).required(),
     password: Joi.string().min(6),
+    about: Joi.string(),
   })
   .required();

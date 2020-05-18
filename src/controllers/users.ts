@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express';
 import { User } from '../models/User';
 import { HttpError } from '../utils/HttpError';
+import { bucket } from '../utils/storage';
 
 export const getUsers: RequestHandler = async (req, res, next) => {
   try {
@@ -40,6 +41,40 @@ export const getUser: RequestHandler = async (req, res, next) => {
   }
 };
 
+const removePhoto = async (filename: string): Promise<void> => {
+  const bucketFile = bucket.file(filename);
+  await bucketFile.delete();
+};
+
+const uploadPhoto = async (
+  file: Express.Multer.File,
+): Promise<{ url: string; filename: string; contentType: string }> => {
+  const filename = Date.now() + file.originalname;
+  const contentType = file.mimetype;
+  const bucketFile = bucket.file(filename);
+  const stream = bucketFile.createWriteStream({
+    metadata: { contentType },
+    resumable: false,
+  });
+  return new Promise<{ url: string; filename: string; contentType: string }>(
+    (resolve, reject) => {
+      stream.on('error', (err) => {
+        reject(err);
+      });
+      stream.on('finish', () => {
+        bucketFile.makePublic().then(() => {
+          resolve({
+            url: `https://storage.googleapis.com/${bucket.name}/${filename}`,
+            filename,
+            contentType,
+          });
+        });
+      });
+      stream.end(file.buffer);
+    },
+  );
+};
+
 export const putUser: RequestHandler = async (req, res, next) => {
   try {
     const { _id } = req.params;
@@ -53,12 +88,19 @@ export const putUser: RequestHandler = async (req, res, next) => {
     if (!user) {
       throw new HttpError(404, 'Not found');
     }
-    const { name, email, password } = req.body;
+    const { name, email, password, about } = req.body;
     user.name = name;
     user.email = email;
+    user.about = about;
     if (password) {
       const hashedPassword = await User.encryptPassword(password);
       user.password = hashedPassword;
+    }
+    if (req.file) {
+      if (user.photo) {
+        await removePhoto(user.photo.filename);
+      }
+      user.photo = await uploadPhoto(req.file);
     }
     await user.save();
     res.status(200).json({ user: user.serialize() });
