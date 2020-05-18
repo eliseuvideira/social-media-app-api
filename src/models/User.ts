@@ -92,6 +92,8 @@ userSchema.methods.serialize = function (): IUserSerialized {
     _id: this._id,
     name: this.name,
     email: this.email,
+    about: this.about,
+    photo: this.photo,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
   };
