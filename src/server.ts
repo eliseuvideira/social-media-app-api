@@ -55,6 +55,7 @@ const onConnectionError = (): void => {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true,
+    useFindAndModify: false,
   });
   connection.on('error', onConnectionError);
   server.listen(port);

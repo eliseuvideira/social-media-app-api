@@ -6,6 +6,8 @@ import {
   putUser,
   deleteUser,
   getUserPhoto,
+  followUser,
+  unfollowUser,
 } from '../controllers/users';
 import { body, params } from '../middlewares/validation';
 import {
@@ -36,5 +38,9 @@ router.put(
 router.delete('/users/:_id', isAuth, params(getUserParamsSchema), deleteUser);
 
 router.get('/users/:_id/photo', getUserPhoto);
+
+router.post('/users/:_id/follow', isAuth, followUser);
+
+router.post('/users/:_id/unfollow', isAuth, unfollowUser);
 
 export default router;

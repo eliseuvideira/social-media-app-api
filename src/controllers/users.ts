@@ -2,10 +2,14 @@ import { RequestHandler } from 'express';
 import { User } from '../models/User';
 import { HttpError } from '../utils/HttpError';
 import { bucket } from '../utils/storage';
+import { Types } from 'mongoose';
 
 export const getUsers: RequestHandler = async (req, res, next) => {
   try {
-    const users = await User.find();
+    const users = await User.find()
+      .populate('following', '_id name')
+      .populate('followers', '_id name')
+      .exec();
     res.status(200).json({ users: users.map((user) => user.serialize()) });
   } catch (err) {
     next(err);
@@ -31,7 +35,10 @@ export const postUsers: RequestHandler = async (req, res, next) => {
 export const getUser: RequestHandler = async (req, res, next) => {
   try {
     const { _id } = req.params;
-    const user = await User.findById(_id);
+    const user = await User.findById(_id)
+      .populate('following', '_id name')
+      .populate('followers', '_id name')
+      .exec();
     if (!user) {
       throw new HttpError(404, 'Not found');
     }
@@ -139,6 +146,84 @@ export const getUserPhoto: RequestHandler = async (req, res, next) => {
     const bucketFile = bucket.file(user.photo.filename);
     const stream = bucketFile.createReadStream();
     stream.pipe(res.status(200));
+  } catch (err) {
+    next(err);
+  }
+};
+
+const addFollowing = async (userId: any, following: any): Promise<void> => {
+  await User.findByIdAndUpdate(Types.ObjectId(userId), {
+    $push: { following: Types.ObjectId(following) },
+  });
+};
+
+const addFollower = async (userId: any, follower: any): Promise<void> => {
+  await User.findByIdAndUpdate(Types.ObjectId(userId), {
+    $push: { followers: Types.ObjectId(follower) },
+  });
+};
+
+export const followUser: RequestHandler = async (req, res, next) => {
+  try {
+    if (!req.token) {
+      throw new HttpError(401, 'Unauthorized');
+    }
+    const { _id } = req.params;
+    const user = await User.findById(_id);
+    if (!user) {
+      throw new HttpError(404, 'Not found');
+    }
+    if (user._id === req.token.user._id) {
+      throw new HttpError(422, 'Unprocessable entity');
+    }
+    await addFollower(_id, req.token.user._id);
+    await addFollowing(req.token.user._id, _id);
+    const foundUser = await User.findOne({ _id });
+    if (!foundUser) {
+      throw new Error(`Failed to fetch user '_id=${user._id}'`);
+    }
+    await foundUser.populate('followers', '_id name').execPopulate();
+    await foundUser.populate('following', '_id name').execPopulate();
+    res.status(200).json({ user: foundUser.serialize() });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const removeFollowing = async (userId: any, following: any): Promise<void> => {
+  await User.findByIdAndUpdate(Types.ObjectId(userId), {
+    $pull: { following: Types.ObjectId(following) },
+  });
+};
+
+const removeFollower = async (userId: any, follower: any): Promise<void> => {
+  await User.findByIdAndUpdate(Types.ObjectId(userId), {
+    $pull: { followers: Types.ObjectId(follower) },
+  });
+};
+
+export const unfollowUser: RequestHandler = async (req, res, next) => {
+  try {
+    if (!req.token) {
+      throw new HttpError(401, 'Unauthorized');
+    }
+    const { _id } = req.params;
+    const user = await User.findById(_id);
+    if (!user) {
+      throw new HttpError(404, 'Not found');
+    }
+    if (user._id === req.token.user._id) {
+      throw new HttpError(422, 'Unprocessable entity');
+    }
+    await removeFollowing(req.token.user._id, _id);
+    await removeFollower(_id, req.token.user._id);
+    const foundUser = await User.findOne({ _id: user._id })
+      .populate('following', '_id name')
+      .populate('followers', '_id name');
+    if (!foundUser) {
+      throw new Error(`Failed to fetch user '_id=${user._id}'`);
+    }
+    res.status(200).json({ user: foundUser.serialize() });
   } catch (err) {
     next(err);
   }

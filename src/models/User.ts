@@ -2,7 +2,8 @@ import { Schema, model, Document, Model } from 'mongoose';
 import { REGEX_EMAIL } from '../utils/constants';
 import { compare, hash } from 'bcryptjs';
 
-interface IUser {
+export interface IUser {
+  _id: any;
   name: string;
   email: string;
   password: string;
@@ -16,6 +17,8 @@ interface IUser {
     filename: string;
     contentType: string;
   };
+  following: any[];
+  followers: any[];
 }
 
 interface IUserSerialized {
@@ -30,6 +33,8 @@ interface IUserSerialized {
     filename: string;
     contentType: string;
   };
+  following: any[];
+  followers: any[];
 }
 
 const userSchema = new Schema<IUser & Document>(
@@ -71,6 +76,8 @@ const userSchema = new Schema<IUser & Document>(
       },
       required: false,
     },
+    following: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    followers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   },
   { timestamps: true },
 );
@@ -96,6 +103,8 @@ userSchema.methods.serialize = function (): IUserSerialized {
     photo: this.photo,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
+    followers: this.followers,
+    following: this.following,
   };
 };
 
