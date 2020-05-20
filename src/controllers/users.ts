@@ -7,8 +7,8 @@ import { Types } from 'mongoose';
 export const getUsers: RequestHandler = async (req, res, next) => {
   try {
     const users = await User.find()
-      .populate('following', '_id name')
-      .populate('followers', '_id name')
+      .populate('following', '_id name photo.url')
+      .populate('followers', '_id name photo.url')
       .exec();
     res.status(200).json({ users: users.map((user) => user.serialize()) });
   } catch (err) {
@@ -36,8 +36,8 @@ export const getUser: RequestHandler = async (req, res, next) => {
   try {
     const { _id } = req.params;
     const user = await User.findById(_id)
-      .populate('following', '_id name')
-      .populate('followers', '_id name')
+      .populate('following', '_id name photo.url')
+      .populate('followers', '_id name photo.url')
       .exec();
     if (!user) {
       throw new HttpError(404, 'Not found');
@@ -182,8 +182,8 @@ export const followUser: RequestHandler = async (req, res, next) => {
     if (!foundUser) {
       throw new Error(`Failed to fetch user '_id=${user._id}'`);
     }
-    await foundUser.populate('followers', '_id name').execPopulate();
-    await foundUser.populate('following', '_id name').execPopulate();
+    await foundUser.populate('followers', '_id name photo.url').execPopulate();
+    await foundUser.populate('following', '_id name photo.url').execPopulate();
     res.status(200).json({ user: foundUser.serialize() });
   } catch (err) {
     next(err);
@@ -218,8 +218,8 @@ export const unfollowUser: RequestHandler = async (req, res, next) => {
     await removeFollowing(req.token.user._id, _id);
     await removeFollower(_id, req.token.user._id);
     const foundUser = await User.findOne({ _id: user._id })
-      .populate('following', '_id name')
-      .populate('followers', '_id name');
+      .populate('following', '_id name photo.url')
+      .populate('followers', '_id name photo.url');
     if (!foundUser) {
       throw new Error(`Failed to fetch user '_id=${user._id}'`);
     }
