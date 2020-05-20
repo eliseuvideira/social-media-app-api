@@ -243,7 +243,7 @@ export const findPeople: RequestHandler = async (req, res, next) => {
       .concat(user._id);
     const users = await User.find({ _id: { $nin: alreadyFollowing } })
       .limit(10)
-      .select('name photo');
+      .select('_id name email photo');
     res.status(200).json({ users });
   } catch (err) {
     next(err);
