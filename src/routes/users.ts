@@ -8,6 +8,7 @@ import {
   getUserPhoto,
   followUser,
   unfollowUser,
+  findPeople,
 } from '../controllers/users';
 import { body, params } from '../middlewares/validation';
 import {
@@ -42,5 +43,7 @@ router.get('/users/:_id/photo', getUserPhoto);
 router.post('/users/:_id/follow', isAuth, followUser);
 
 router.post('/users/:_id/unfollow', isAuth, unfollowUser);
+
+router.get('/users/:_id/find-people', isAuth, findPeople);
 
 export default router;

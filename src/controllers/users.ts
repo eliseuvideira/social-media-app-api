@@ -88,7 +88,7 @@ export const putUser: RequestHandler = async (req, res, next) => {
     if (!req.token) {
       throw new HttpError(401, 'Unathorized');
     }
-    if (!req.token.user || req.token.user._id !== _id) {
+    if (req.token.user._id !== _id) {
       throw new HttpError(403, 'Forbidden');
     }
     const user = await User.findById(_id);
@@ -122,7 +122,7 @@ export const deleteUser: RequestHandler = async (req, res, next) => {
     if (!req.token) {
       throw new HttpError(401, 'Unathorized');
     }
-    if (!req.token.user || req.token.user._id !== _id) {
+    if (req.token.user._id !== _id) {
       throw new HttpError(403, 'Forbidden');
     }
     const user = await User.findById(_id);
@@ -169,12 +169,12 @@ export const followUser: RequestHandler = async (req, res, next) => {
       throw new HttpError(401, 'Unauthorized');
     }
     const { _id } = req.params;
+    if (_id === req.token.user._id) {
+      throw new HttpError(403, 'Forbidden');
+    }
     const user = await User.findById(_id);
     if (!user) {
       throw new HttpError(404, 'Not found');
-    }
-    if (user._id === req.token.user._id) {
-      throw new HttpError(422, 'Unprocessable entity');
     }
     await addFollower(_id, req.token.user._id);
     await addFollowing(req.token.user._id, _id);
@@ -208,15 +208,15 @@ export const unfollowUser: RequestHandler = async (req, res, next) => {
       throw new HttpError(401, 'Unauthorized');
     }
     const { _id } = req.params;
+    if (_id === req.token.user._id) {
+      throw new HttpError(403, 'Forbidden');
+    }
     const user = await User.findById(_id);
     if (!user) {
       throw new HttpError(404, 'Not found');
     }
-    if (user._id === req.token.user._id) {
-      throw new HttpError(422, 'Unprocessable entity');
-    }
-    await removeFollowing(req.token.user._id, _id);
     await removeFollower(_id, req.token.user._id);
+    await removeFollowing(req.token.user._id, _id);
     const foundUser = await User.findOne({ _id: user._id })
       .populate('following', '_id name photo.url')
       .populate('followers', '_id name photo.url');
@@ -224,6 +224,27 @@ export const unfollowUser: RequestHandler = async (req, res, next) => {
       throw new Error(`Failed to fetch user '_id=${user._id}'`);
     }
     res.status(200).json({ user: foundUser.serialize() });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const findPeople: RequestHandler = async (req, res, next) => {
+  try {
+    if (!req.token) {
+      throw new HttpError(401, 'Unauthorized');
+    }
+    const user = await User.findById(req.token.user._id);
+    if (!user) {
+      throw new HttpError(401, 'Unauthorized');
+    }
+    const alreadyFollowing = user.following
+      .map((follower) => follower._id)
+      .concat(user._id);
+    const users = await User.find({ _id: { $nin: alreadyFollowing } })
+      .limit(10)
+      .select('name');
+    res.status(200).json({ users });
   } catch (err) {
     next(err);
   }
