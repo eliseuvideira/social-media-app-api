@@ -9,6 +9,7 @@ import {
   followUser,
   unfollowUser,
   findPeople,
+  userOnlyRoute,
 } from '../controllers/users';
 import { body, params } from '../middlewares/validation';
 import {
@@ -33,10 +34,17 @@ router.put(
   multer.single('photo'),
   params(getUserParamsSchema),
   body(putUserBodySchema),
+  userOnlyRoute,
   putUser,
 );
 
-router.delete('/users/:_id', isAuth, params(getUserParamsSchema), deleteUser);
+router.delete(
+  '/users/:_id',
+  isAuth,
+  params(getUserParamsSchema),
+  userOnlyRoute,
+  deleteUser,
+);
 
 router.get('/users/:_id/photo', getUserPhoto);
 
