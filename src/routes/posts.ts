@@ -7,6 +7,8 @@ import {
   updatePost,
   deletePost,
   checkPostedByUser,
+  likePost,
+  dislikePost,
 } from '../controllers/posts';
 import { body, params } from '../middlewares/validation';
 import {
@@ -38,6 +40,15 @@ router.delete(
   params(getPostParamsSchema),
   checkPostedByUser,
   deletePost,
+);
+
+router.post('/posts/:_id/like', isAuth, params(getPostParamsSchema), likePost);
+
+router.post(
+  '/posts/:_id/dislike',
+  isAuth,
+  params(getPostParamsSchema),
+  dislikePost,
 );
 
 export default router;

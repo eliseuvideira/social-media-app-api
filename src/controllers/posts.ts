@@ -116,3 +116,46 @@ export const deletePost: RequestHandler = async (req, res, next) => {
     next(err);
   }
 };
+
+export const likePost: RequestHandler = async (req, res, next) => {
+  try {
+    if (!req.token) {
+      throw new HttpError(401, 'Unauthorized');
+    }
+    const { _id } = req.params;
+    const post = await Post.findById(_id);
+    if (!post) {
+      throw new HttpError(404, 'Not found');
+    }
+    if (
+      !post.likes
+        .map((userId) => userId.toString())
+        .includes(req.token.user._id)
+    ) {
+      post.likes.push(Types.ObjectId(req.token.user._id));
+    }
+    await post.save();
+    res.status(200).json({ post });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const dislikePost: RequestHandler = async (req, res, next) => {
+  try {
+    if (!req.token) {
+      throw new HttpError(401, 'Unauthorized');
+    }
+    const { _id } = req.params;
+    const post = await Post.findById(_id);
+    if (!post) {
+      throw new HttpError(404, 'Not found');
+    }
+    const userId = req.token.user._id;
+    post.likes = post.likes.filter((id) => id.toString() !== userId);
+    await post.save();
+    res.status(200).json({ post });
+  } catch (err) {
+    next(err);
+  }
+};
