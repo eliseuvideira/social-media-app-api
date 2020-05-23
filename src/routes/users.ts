@@ -11,6 +11,7 @@ import {
   findPeople,
   userOnlyRoute,
   getUserPosts,
+  getUserFeed,
 } from '../controllers/users';
 import { body, params } from '../middlewares/validation';
 import {
@@ -56,5 +57,7 @@ router.post('/users/:_id/unfollow', isAuth, unfollowUser);
 router.get('/users/:_id/find-people', isAuth, findPeople);
 
 router.get('/users/:_id/posts', isAuth, getUserPosts);
+
+router.get('/users/:_id/feed', isAuth, getUserFeed);
 
 export default router;

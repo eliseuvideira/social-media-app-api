@@ -267,3 +267,23 @@ export const getUserPosts: RequestHandler = async (req, res, next) => {
     next(err);
   }
 };
+
+export const getUserFeed: RequestHandler = async (req, res, next) => {
+  try {
+    const { _id } = req.params;
+    const user = await User.findById(_id);
+    if (!user) {
+      throw new HttpError(404, 'Not found');
+    }
+    const posts = await Post.find({
+      postedBy: { $in: user.following },
+    })
+      .populate('comments.postedBy', '_id name photo')
+      .populate('postedBy', '_id name photo')
+      .sort('-created')
+      .exec();
+    res.status(200).json({ posts });
+  } catch (err) {
+    next(err);
+  }
+};

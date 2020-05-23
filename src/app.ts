@@ -24,6 +24,11 @@ app.use('/robots.txt', (req, res) =>
 );
 app.use('/favicon.ico', (req, res) => res.status(404).end());
 
+const models = readdirSync(join(__dirname, 'models'));
+for (const model of models) {
+  require(join(__dirname, 'models', model));
+}
+
 const routes = readdirSync(join(__dirname, 'routes'));
 for (const route of routes) {
   app.use(require(join(__dirname, 'routes', route)).default);
