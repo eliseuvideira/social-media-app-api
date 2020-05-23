@@ -2,7 +2,7 @@ import { Schema, model, Document, Model } from 'mongoose';
 import { REGEX_EMAIL } from '../utils/constants';
 import { compare, hash } from 'bcryptjs';
 
-export interface IUser {
+interface IUser {
   _id: any;
   name: string;
   email: string;
@@ -37,7 +37,9 @@ interface IUserSerialized {
   followers: any[];
 }
 
-const userSchema = new Schema<IUser & Document>(
+export type IUserDocument = IUser & Document;
+
+const userSchema = new Schema<IUserDocument>(
   {
     name: {
       type: String,
@@ -108,8 +110,8 @@ userSchema.methods.serialize = function (): IUserSerialized {
   };
 };
 
-interface IUserModel extends Model<IUser & Document> {
+interface IUserModel extends Model<IUserDocument> {
   encryptPassword: (password: string) => Promise<string>;
 }
 
-export const User = model<IUser & Document, IUserModel>('User', userSchema);
+export const User = model<IUserDocument, IUserModel>('User', userSchema);

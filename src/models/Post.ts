@@ -9,16 +9,14 @@ interface IPost {
   };
   postedBy: any;
   likes: any[];
-  comments: {
-    content: string;
-    postedBy: any;
-    createdAt: Date;
-  }[];
+  comments: any[];
   createdAt: Date;
   updatedAt: Date;
 }
 
-const postSchema = new Schema<IPost & Document>(
+export type IPostDocument = IPost & Document;
+
+const postSchema = new Schema<IPostDocument>(
   {
     content: {
       type: String,
@@ -53,24 +51,12 @@ const postSchema = new Schema<IPost & Document>(
     ],
     comments: [
       {
-        content: {
-          type: String,
-          required: true,
-        },
-        createdAt: {
-          type: Date,
-          default: Date.now,
-        },
-        postedBy: {
-          type: Types.ObjectId,
-          ref: 'User',
-        },
+        type: Types.ObjectId,
+        ref: 'Comment',
       },
     ],
   },
   { timestamps: true },
 );
-
-export type IPostDocument = IPost & Document;
 
 export const Post = model<IPost & Document>('Post', postSchema);
