@@ -10,6 +10,7 @@ import {
   unfollowUser,
   findPeople,
   userOnlyRoute,
+  getUserPosts,
 } from '../controllers/users';
 import { body, params } from '../middlewares/validation';
 import {
@@ -53,5 +54,7 @@ router.post('/users/:_id/follow', isAuth, followUser);
 router.post('/users/:_id/unfollow', isAuth, unfollowUser);
 
 router.get('/users/:_id/find-people', isAuth, findPeople);
+
+router.get('/users/:_id/posts', isAuth, getUserPosts);
 
 export default router;

@@ -3,6 +3,7 @@ import { User } from '../models/User';
 import { HttpError } from '../utils/HttpError';
 import { bucket } from '../utils/storage';
 import { Types } from 'mongoose';
+import { Post } from '../models/Post';
 
 export const getUsers: RequestHandler = async (req, res, next) => {
   try {
@@ -248,6 +249,20 @@ export const findPeople: RequestHandler = async (req, res, next) => {
       .limit(10)
       .select('_id name email photo');
     res.status(200).json({ users });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getUserPosts: RequestHandler = async (req, res, next) => {
+  try {
+    const { _id } = req.params;
+    const user = await User.findById(_id);
+    if (!user) {
+      throw new HttpError(404, 'Not found');
+    }
+    const posts = await Post.find({ postedBy: Types.ObjectId(user._id) });
+    res.status(200).json({ posts });
   } catch (err) {
     next(err);
   }
