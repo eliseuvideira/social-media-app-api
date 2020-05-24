@@ -6,7 +6,11 @@ import { Types } from 'mongoose';
 
 export const getPosts: RequestHandler = async (req, res, next) => {
   try {
-    const posts = await Post.find().sort({ createdAt: -1 }).limit(20);
+    const posts = await Post.find()
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .populate('postedBy', '_id name email photo')
+      .exec();
     res.status(200).json({ posts });
   } catch (err) {
     next(err);
@@ -65,7 +69,9 @@ export const createPost: RequestHandler = async (req, res, next) => {
 export const getPost: RequestHandler = async (req, res, next) => {
   try {
     const { _id } = req.params;
-    const post = await Post.findById(_id);
+    const post = await Post.findById(_id)
+      .populate('postedBy', '_id name email photo')
+      .exec();
     if (!post) {
       throw new HttpError(404, 'Not found');
     }

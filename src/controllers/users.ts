@@ -261,7 +261,10 @@ export const getUserPosts: RequestHandler = async (req, res, next) => {
     if (!user) {
       throw new HttpError(404, 'Not found');
     }
-    const posts = await Post.find({ postedBy: Types.ObjectId(user._id) });
+    const posts = await Post.find({ postedBy: Types.ObjectId(user._id) })
+      .populate('comments.postedBy', '_id name email photo')
+      .populate('postedBy', '_id name email photo')
+      .exec();
     res.status(200).json({ posts });
   } catch (err) {
     next(err);
@@ -278,8 +281,8 @@ export const getUserFeed: RequestHandler = async (req, res, next) => {
     const posts = await Post.find({
       postedBy: { $in: user.following },
     })
-      .populate('comments.postedBy', '_id name photo')
-      .populate('postedBy', '_id name photo')
+      .populate('comments.postedBy', '_id name email photo')
+      .populate('postedBy', '_id name email photo')
       .sort('-created')
       .exec();
     res.status(200).json({ posts });
