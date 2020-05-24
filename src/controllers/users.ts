@@ -279,11 +279,11 @@ export const getUserFeed: RequestHandler = async (req, res, next) => {
       throw new HttpError(404, 'Not found');
     }
     const posts = await Post.find({
-      postedBy: { $in: user.following },
+      postedBy: { $in: [...user.following, user._id] },
     })
+      .sort('-createdAt')
       .populate('comments.postedBy', '_id name email photo')
       .populate('postedBy', '_id name email photo')
-      .sort('-created')
       .exec();
     res.status(200).json({ posts });
   } catch (err) {
