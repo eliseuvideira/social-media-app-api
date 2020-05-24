@@ -16,12 +16,19 @@ import {
   getPostParamsSchema,
   updatePostBodySchema,
 } from '../validations/posts';
+import { multer } from '../middlewares/multer';
 
 const router = Router();
 
 router.get('/posts', isAuth, getPosts);
 
-router.post('/posts', isAuth, body(createPostBodySchema), createPost);
+router.post(
+  '/posts',
+  isAuth,
+  multer.single('photo'),
+  body(createPostBodySchema),
+  createPost,
+);
 
 router.get('/posts/:_id', isAuth, params(getPostParamsSchema), getPost);
 
