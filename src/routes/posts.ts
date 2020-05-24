@@ -9,12 +9,15 @@ import {
   checkPostedByUser,
   likePost,
   dislikePost,
+  postComments,
+  deleteComment,
 } from '../controllers/posts';
 import { body, params } from '../middlewares/validation';
 import {
   createPostBodySchema,
   getPostParamsSchema,
   updatePostBodySchema,
+  postCommentsBodySchema,
 } from '../validations/posts';
 import { multer } from '../middlewares/multer';
 
@@ -57,5 +60,14 @@ router.post(
   params(getPostParamsSchema),
   dislikePost,
 );
+
+router.post(
+  '/posts/:_id/comments',
+  isAuth,
+  body(postCommentsBodySchema),
+  postComments,
+);
+
+router.delete('/posts/:_id/comments/:commentId', isAuth, deleteComment);
 
 export default router;

@@ -3,6 +3,7 @@ import { HttpError } from '../utils/HttpError';
 import { Post, IPostDocument } from '../models/Post';
 import { bucket } from '../utils/storage';
 import { Types } from 'mongoose';
+import { Comment } from '../models/Comment';
 
 export const getPosts: RequestHandler = async (req, res, next) => {
   try {
@@ -10,6 +11,7 @@ export const getPosts: RequestHandler = async (req, res, next) => {
       .sort({ createdAt: -1 })
       .limit(20)
       .populate('postedBy', '_id name email photo')
+      .populate('comments', '_id content postedBy createdAt')
       .exec();
     res.status(200).json({ posts });
   } catch (err) {
@@ -71,6 +73,7 @@ export const getPost: RequestHandler = async (req, res, next) => {
     const { _id } = req.params;
     const post = await Post.findById(_id)
       .populate('postedBy', '_id name email photo')
+      .populate('comments', '_id content postedBy createdAt')
       .exec();
     if (!post) {
       throw new HttpError(404, 'Not found');
@@ -161,6 +164,55 @@ export const dislikePost: RequestHandler = async (req, res, next) => {
     post.likes = post.likes.filter((id) => id.toString() !== userId);
     await post.save();
     res.status(200).json({ post });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const postComments: RequestHandler = async (req, res, next) => {
+  try {
+    if (!req.token) {
+      throw new HttpError(401, 'Unauthorized');
+    }
+    const { _id } = req.params;
+    const post = await Post.findById(_id);
+    if (!post) {
+      throw new HttpError(404, 'Not found');
+    }
+    const { content } = req.body;
+    const comment = new Comment({
+      content,
+      postedBy: Types.ObjectId(req.token.user._id),
+    });
+    await comment.save();
+    post.comments.push(comment._id);
+    await post.save();
+    await post
+      .populate('comments', '_id content postedBy createdAt')
+      .execPopulate();
+    res.status(201).json({ post });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteComment: RequestHandler = async (req, res, next) => {
+  try {
+    const { _id, commentId } = req.params;
+    const post = await Post.findById(_id);
+    if (!post) {
+      throw new HttpError(404, 'Not found');
+    }
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      throw new HttpError(404, 'Not found');
+    }
+    post.comments = post.comments.filter(
+      (comment) => comment.toString() === comment._id.toString(),
+    );
+    await post.save();
+    await comment.remove();
+    res.status(204).end();
   } catch (err) {
     next(err);
   }

@@ -14,3 +14,7 @@ export const getPostParamsSchema = Joi.object()
 export const updatePostBodySchema = Joi.object()
   .keys({ content: Joi.string().required() })
   .required();
+
+export const postCommentsBodySchema = Joi.object()
+  .keys({ content: Joi.string().required() })
+  .required();
