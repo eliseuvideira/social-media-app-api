@@ -1,4 +1,4 @@
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model, Types, Document } from 'mongoose';
 
 interface IComment {
   content: string;
@@ -23,4 +23,4 @@ const commentSchema = new Schema<ICommentDocument>(
   { timestamps: true },
 );
 
-export const Comment = model('Comment', commentSchema);
+export const Comment = model<ICommentDocument>('Comment', commentSchema);

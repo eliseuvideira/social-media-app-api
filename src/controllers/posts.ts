@@ -11,7 +11,14 @@ export const getPosts: RequestHandler = async (req, res, next) => {
       .sort({ createdAt: -1 })
       .limit(20)
       .populate('postedBy', '_id name email photo')
-      .populate('comments', '_id content postedBy createdAt')
+      .populate({
+        path: 'comments',
+        select: '_id content postedBy createdAt',
+        populate: {
+          path: 'postedBy',
+          select: '_id name email photo',
+        },
+      })
       .exec();
     res.status(200).json({ posts });
   } catch (err) {
@@ -73,7 +80,14 @@ export const getPost: RequestHandler = async (req, res, next) => {
     const { _id } = req.params;
     const post = await Post.findById(_id)
       .populate('postedBy', '_id name email photo')
-      .populate('comments', '_id content postedBy createdAt')
+      .populate({
+        path: 'comments',
+        select: '_id content postedBy createdAt',
+        populate: {
+          path: 'postedBy',
+          select: '_id name email photo',
+        },
+      })
       .exec();
     if (!post) {
       throw new HttpError(404, 'Not found');

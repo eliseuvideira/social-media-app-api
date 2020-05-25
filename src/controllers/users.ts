@@ -263,7 +263,14 @@ export const getUserPosts: RequestHandler = async (req, res, next) => {
     }
     const posts = await Post.find({ postedBy: Types.ObjectId(user._id) })
       .sort('-createdAt')
-      .populate('comments.postedBy', '_id name email photo')
+      .populate({
+        path: 'comments',
+        select: '_id content postedBy createdAt',
+        populate: {
+          path: 'postedBy',
+          select: '_id name email photo',
+        },
+      })
       .populate('postedBy', '_id name email photo')
       .exec();
     res.status(200).json({ posts });
@@ -283,8 +290,15 @@ export const getUserFeed: RequestHandler = async (req, res, next) => {
       postedBy: { $in: [...user.following, user._id] },
     })
       .sort('-createdAt')
-      .populate('comments.postedBy', '_id name email photo')
       .populate('postedBy', '_id name email photo')
+      .populate({
+        path: 'comments',
+        select: '_id content postedBy createdAt',
+        populate: {
+          path: 'postedBy',
+          select: '_id name email photo',
+        },
+      })
       .exec();
     res.status(200).json({ posts });
   } catch (err) {
