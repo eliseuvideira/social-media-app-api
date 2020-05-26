@@ -11,19 +11,6 @@ services:
       - '${PORT}:${PORT}'
     networks:
       - 'api-network'
-    depends_on:
-      - 'mongodb'
     restart: 'always'
     environment:
       - 'NODE_ENV=production'
-      - 'MONGODB_URI=mongodb://${MONGODB_CONTAINER_NAME}:27017/${APP_NAME}'
-  mongodb:
-    container_name: '${MONGODB_CONTAINER_NAME}'
-    image: 'mongo'
-    ports:
-      - '27017:27017'
-    networks:
-      - 'api-network'
-    restart: 'always'
-    volumes:
-      - '~/data/mongodb:/data/db'
