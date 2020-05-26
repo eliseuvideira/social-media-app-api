@@ -17,9 +17,9 @@ const verifyToken = (token: string, secret: string): ObjectWithAnyProps => {
 };
 
 const getSecret = (): string => {
-  const secret = process.env.JWT_SECRET;
+  const secret = process.env.JWT_PUBLIC_KEY;
   if (!secret) {
-    throw new Error('JWT_SECRET not set');
+    throw new Error('JWT_PUBLIC_KEY not set');
   }
   return secret;
 };

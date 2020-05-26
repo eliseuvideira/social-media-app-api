@@ -2,16 +2,14 @@ import { RequestHandler } from 'express';
 import { User } from '../models/User';
 import { HttpError } from '../utils/HttpError';
 import { sign } from 'jsonwebtoken';
-import fs from 'fs';
-import { promisify } from 'util';
-import { PRIVATE_KEY_PATH } from '../utils/constants';
-
-const readFile = promisify(fs.readFile);
 
 let key: Buffer | null = null;
 const getPrivateKey = async (): Promise<Buffer> => {
   if (!key) {
-    key = await readFile(PRIVATE_KEY_PATH);
+    if (!process.env.JWT_PRIVATE_KEY) {
+      throw new Error('environment variable "JWT_PRIVATE_KEY" not set');
+    }
+    key = Buffer.from(process.env.JWT_PRIVATE_KEY, 'utf-8');
   }
   return key;
 };
